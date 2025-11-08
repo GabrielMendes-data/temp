@@ -107,7 +107,7 @@ class FocusFetchData(IFetchData):
 
         if not date or not indicator or not temporal_series:
             raise ValueError(
-                "`dt_referencia`, `indicador` e `serie_temporal` " \
+                "`dt_referencia`, `indicador` e `serie_temporal` "
                 "são obrigatórios para construir a URL."
             )
 
