@@ -96,3 +96,4 @@ target/
 #outros
 /venv
 *__init__.py
+*__init__.py
