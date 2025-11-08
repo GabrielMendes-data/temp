@@ -99,7 +99,9 @@ class FocusFetchData(IFetchData):
                 pass
         raise ValueError(f"Formato de data inválido: {date_str}")
 
-    def build_url(self, indicator: str, date: str, temporal_series: str) -> str:
+    def build_url(
+        self, indicator: str, date: str, temporal_series: str
+    ) -> str:
         """Constrói URL completa para requisição da API Olinda."""
 
         if not date or not indicator or not temporal_series:
@@ -123,11 +125,15 @@ class FocusFetchData(IFetchData):
                 f"$filter=Indicador eq '{indicator}' and DataReferencia eq '{date_str}'"
             )
         else:
-            raise ValueError("`serie_temporal` inválido. Deve ser 'anual' ou 'mensal'.")
+            raise ValueError(
+                "`serie_temporal` inválido. Deve ser 'anual' ou 'mensal'."
+            )
 
         return url
 
-    def fetch_data(self, indicator: str, date: str, temporal_series: str) -> dict:
+    def fetch_data(
+        self, indicator: str, date: str, temporal_series: str
+    ) -> dict:
         """
         Realiza a requisição HTTP e retorna os dados como um DataFrame.
         """
@@ -278,7 +284,9 @@ class TesouroFetchData(IFetchData):
     """Classe para coletar dados de taxas do Tesouro Direto."""
 
     def __init__(self) -> None:
-        super().__init__(file_yaml["endpoints"]["tesouro"]["taxas_tesouro"]["base_url"])
+        super().__init__(
+            file_yaml["endpoints"]["tesouro"]["taxas_tesouro"]["base_url"]
+        )
 
     def parse_date(self, date_str: str) -> datetime:
         """Tenta interpretar a data em diferentes formatos possíveis."""
@@ -329,34 +337,3 @@ class TesouroFetchData(IFetchData):
         except Exception as e:
             logging.error(f"Erro na API Tesouro Direto: {e}")
             return None
-
-
-if __name__ == "__main__":
-
-    selic = SelicFetchData()
-    data = selic.fetch_data(date="31/10/2025")
-    print(data)
-
-    print("--------------------------------")
-    focus = FocusFetchData()
-    data = focus.fetch_data(
-        indicator="Selic", date="31/10/2025", temporal_series="anual"
-    )
-    print(data)
-
-    print("--------------------------------")
-    moedas = MoedasFetchData()
-    data = moedas.fetch_data(date="31/10/2025")
-    print(data)
-
-    print("--------------------------------")
-    ibge = IbgeFetchData()
-    data = ibge.fetch_data(date="30/09/2025")
-    print(data)
-
-    print("--------------------------------")
-
-    print("--------------------------------")
-    tesouro = TesouroFetchData()
-    data = tesouro.fetch_data(date="30/09/2025")
-    print(data)

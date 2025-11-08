@@ -40,7 +40,10 @@ class DataAleatoria:
         feriados = {
             pd.Timestamp(h["date"]): h["localName"]
             for h in data
-            if (("Public" in h.get("types", [])) or ("Bank" in h.get("types", [])))
+            if (
+                ("Public" in h.get("types", []))
+                or ("Bank" in h.get("types", []))
+            )
             and h.get("global", False)
         }
         return feriados
