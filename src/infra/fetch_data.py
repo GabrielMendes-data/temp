@@ -82,7 +82,8 @@ class SelicFetchData(IFetchData):
 
 # ============== API Expectativa Mercado ==============
 class FocusFetchData(IFetchData):
-    """Classe para coletar dados de expectativas de mercado da API Focus (BCB)."""
+    """Classe para coletar dados de expectativas de mercado
+    da API Focus (BCB)."""
 
     def __init__(self) -> None:
         super().__init__(file_yaml["endpoints"]["bcb"]["focus"]["url"])
@@ -106,7 +107,8 @@ class FocusFetchData(IFetchData):
 
         if not date or not indicator or not temporal_series:
             raise ValueError(
-                "`dt_referencia`, `indicador` e `serie_temporal` são obrigatórios para construir a URL."
+                "`dt_referencia`, `indicador` e `serie_temporal` " \
+                "são obrigatórios para construir a URL."
             )
 
         if temporal_series == "anual":
@@ -114,7 +116,8 @@ class FocusFetchData(IFetchData):
 
             url = (
                 f"{self.endpoint}ExpectativasMercadoAnuais?$format=json&"
-                f"$filter=Indicador eq '{indicator}' and DataReferencia eq '{date_str}'"
+                f"$filter=Indicador eq '{indicator}' and "
+                f"DataReferencia eq '{date_str}'"
             )
 
         elif temporal_series == "mensal":
@@ -122,7 +125,8 @@ class FocusFetchData(IFetchData):
 
             url = (
                 f"{self.endpoint}ExpectativaMercadoMensais?$format=json&"
-                f"$filter=Indicador eq '{indicator}' and DataReferencia eq '{date_str}'"
+                f"$filter=Indicador eq '{indicator}' and "
+                f"DataReferencia eq '{date_str}'"
             )
         else:
             raise ValueError(
