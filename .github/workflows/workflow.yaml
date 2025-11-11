@@ -32,3 +32,34 @@ jobs:
 
       - name: Executar testes (pytest)
         run: pytest tests
+        
+  continous-Deployment:
+    needs: continous-Integration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials Action For GitHub Actions
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login Amazon ECR
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.ECR_URI }}
+      
+      - name: Build Docker Image
+        run: |
+          docker build -t project_api_mercado_lambda:latest .
+      
+      - name: Tag Docker Image
+        run: |
+          docker tag project_api_mercado_lambda:latest ${{ secrets.ECR_URI }}:latest
+      
+      - name: Push Docker Image
+        run: |
+          docker push ${{ secrets.ECR_URI }}:latest
