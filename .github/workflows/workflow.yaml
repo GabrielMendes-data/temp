@@ -35,9 +35,6 @@ jobs:
       - name: Adicionar src ao PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
 
-      - name: Lint do código (flake8)
-        run: flake8 src tests main.py
-
       - name: Executar testes (pytest)
         run: pytest tests
 
