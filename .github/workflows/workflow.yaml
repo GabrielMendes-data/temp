@@ -1,9 +1,12 @@
 name: Python CI
 
 on:
+  push:
+    branches:
+    [ "main" ]
   pull_request:
     branches:
-      ['main']
+      [ "main" ]
 
 jobs:
   continous-Integration:
@@ -54,7 +57,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t project_api_mercado_lambda:latest .
+          docker build --platform linux/amd64 -t project_api_mercado_lambda:latest .
 
       - name: Tag Docker Image
         run: |
@@ -63,3 +66,10 @@ jobs:
       - name: Push Docker Image
         run: |
           docker push ${{ secrets.ECR_URI }}:latest
+
+      - name: Update Lambda Function
+        run: |
+          aws lambda update-function-code \
+            --function-name api-mercado-lambda \
+            -- image-uri ${{ secrets.ECR_URI }}:latest \
+            -- region ${{ secrets.AWS_REGION }}
