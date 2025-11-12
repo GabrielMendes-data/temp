@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from src.infra.fetch_data import (
     SelicFetchData,
     FocusFetchData,
-    MoedasFetchData,
+    DolarFetchData,
     IbgeFetchData,
     TesouroFetchData,
 )
@@ -98,11 +98,11 @@ def test_focus_build_url_and_fetch_data():
     assert r.status_code == 200
 
 
-def test_moedas_build_url_and_fetch_data():
-    moedas = MoedasFetchData()
+def test_dolar_build_url_and_fetch_data():
+    dolar = DolarFetchData()
     data = DataAleatoria(datetime.now().year).gerar_data_aleatoria()
     print(f"Data: {data}")
-    url = moedas.build_url(data)
+    url = dolar.build_url(data)
     print(f"URL: {url}")
 
     r = requests.get(url, timeout=30)
@@ -129,6 +129,3 @@ def test_tesouro_build_url_and_fetch_data():
 
     r = requests.get(url, timeout=30)
     assert r.status_code == 200
-
-
-# NOTE: solucionar warnings devido API de feriados
