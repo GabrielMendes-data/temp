@@ -17,25 +17,16 @@ endpoints:
         date: { tipo: "string", obrigatorio: true, exemplo: "01/01/2023" }
         temporal_series: { tipo: "string", obrigatorio: true, opcoes: ["anual", "mensal"] }
 
-    # dolar:
-    #   url: "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarPeriodo(dataInicial=@dataInicial,dataFinalCotacao=@dataFinalCotacao)"
-    #   descricao: "Cotação do Dólar - série diária."
-    #   formato: "json"
-    #   params:
-    #     '@dataInicial': { tipo: "string", obrigatorio: true, exemplo: "'01-20-2023'" }
-    #     '@dataFinalCotacao': { tipo: "string", obrigatorio: true, exemplo: "'01-28-2023'" }
-
-    moedas:
-      url: "http://www4.bcb.gov.br/Download/fechamento/"
-      descricao: "CSV de fechamento diário de moedas (BCB)."
-      formato: "csv"
+    dolar:
+      url: "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)"
+      descricao: "Cotação do Dólar - série diária."
       params:
-        data: {tipo: "string", obrigatorio: true, exemplo: "20230125" } # Formato YYYYMMDD
+        '@dataCotacao': { tipo: "string", obrigatorio: true, exemplo: "'01-20-2023'" }
 
 
   ibge:
     ipca:
-      url: "https://apisidra.ibge.gov.br/values/t/1737/n1/all"
+      url: "https://apisidra.ibge.gov.br/values"
       descricao: "IPCA (IBGE) - Variação mensal, acumulada no ano e em 12 meses."
       formato: "json"
       params:

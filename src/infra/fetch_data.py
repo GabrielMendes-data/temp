@@ -4,7 +4,6 @@ import yaml
 import requests
 from io import StringIO
 import csv
-import json
 from datetime import datetime
 from urllib.parse import urlencode
 
@@ -100,10 +99,16 @@ class FocusFetchData(IFetchData):
                 pass
         raise ValueError(f"Formato de data inválido: {date_str}")
 
-    def build_url(
-        self, indicator: str, date: str, temporal_series: str
-    ) -> str:
+    def build_url(self, indicator: str, date: str, temporal_series: str) -> str:
         """Constrói URL completa para requisição da API Olinda."""
+
+        if (
+            indicator
+            not in file_yaml["endpoints"]["bcb"]["focus"]["params"]["indicator"][
+                "opcoes"
+            ]
+        ):
+            raise ValueError(f"Indicador inválido: {indicator}")
 
         if not date or not indicator or not temporal_series:
             raise ValueError(
@@ -129,15 +134,11 @@ class FocusFetchData(IFetchData):
                 f"DataReferencia eq '{date_str}'"
             )
         else:
-            raise ValueError(
-                "`serie_temporal` inválido. Deve ser 'anual' ou 'mensal'."
-            )
+            raise ValueError("`serie_temporal` inválido. Deve ser 'anual' ou 'mensal'.")
 
         return url
 
-    def fetch_data(
-        self, indicator: str, date: str, temporal_series: str
-    ) -> dict:
+    def fetch_data(self, indicator: str, date: str, temporal_series: str) -> dict:
         """
         Realiza a requisição HTTP e retorna os dados como um DataFrame.
         """
@@ -160,12 +161,12 @@ class FocusFetchData(IFetchData):
             return None
 
 
-# ============== API Moedas ==============
-class MoedasFetchData(IFetchData):
-    """Classe para coletar dados de moedas da API Moedas (BCB)."""
+# ============== API Dolar ==============
+class DolarFetchData(IFetchData):
+    """Classe para coletar dados de dolar da API Dolar (BCB)."""
 
     def __init__(self) -> None:
-        super().__init__(file_yaml["endpoints"]["bcb"]["moedas"]["url"])
+        super().__init__(file_yaml["endpoints"]["bcb"]["dolar"]["url"])
 
     def parse_date(self, date_str: str) -> datetime:
         """
@@ -179,23 +180,14 @@ class MoedasFetchData(IFetchData):
                 pass
         raise ValueError(f"Formato de data inválido: {date_str}")
 
-    def build_url(self, date: str = None) -> str:
+    def build_url(self, date: str) -> str:
         """
-        Constrói a URL para acessar a API Moedas.
+        Constroi a URL com os parâmetros necessários.
         """
+        parsed_date = self.parse_date(date).strftime("%m-%d-%Y")
+        params = {"@dataCotacao": f"'{parsed_date}'", "$format": "json"}
 
-        # Verifica se a data de referência foi fornecida
-        if not date:
-            raise ValueError("`date` é obrigatório para construir a URL.")
-
-        try:
-            date_str = self.parse_date(date).strftime("%Y%m%d")
-        except ValueError as e:
-            logging.error(f"Erro ao processar as datas: {e}")
-            raise
-
-        # Retorna a URL completa
-        return f"{self.endpoint}/{date_str}.csv"
+        return f"{self.endpoint}?{urlencode(params)}"
 
     def fetch_data(self, date: str) -> dict:
         """
@@ -209,32 +201,10 @@ class MoedasFetchData(IFetchData):
             r = requests.get(url, timeout=30)
             r.raise_for_status()
 
-            # Usar módulo csv para ler o arquivo CSV
-            csv_file = StringIO(r.text)
-            reader = csv.reader(csv_file, delimiter=";")
-
-            # Desempacortar o arquivo CSV em lista
-            headers = [
-                "data",
-                "cod",
-                "tipo",
-                "moeda",
-                "taxa_compra",
-                "taxa_venda",
-                "paridade_compra",
-                "paridade_venda",
-            ]
-            list_of_dicts = []
-            for row in reader:
-                list_of_dicts.append(dict(zip(headers, row)))
-
-            # Converter para json
-            json_str = json.dumps(list_of_dicts)
-
-            return json_str
+            return r.json().get("value", [])
 
         except Exception as e:
-            logging.error(f"Erro na API Moedas: {e}")
+            logging.error(f"Erro na API Dolar: {e}")
             return None
 
 
@@ -260,16 +230,22 @@ class IbgeFetchData(IFetchData):
         Constroi a URL com os parâmetros necessários.
         """
         parsed_date = self.parse_date(date).strftime("%Y%m")
-        params = {"formato": "json", "p": parsed_date}
 
-        return f"{self.endpoint}?{urlencode(params)}"
+        values = {"t": "1737", "n1": "all", "p": parsed_date}
+
+        params = {"formato": "json"}
+
+        values_formatted = [f"{key}/{value}" for key, value in values.items()]
+
+        return f"{self.endpoint}/{'/'.join(values_formatted)}?{urlencode(params)}"
 
     def fetch_data(self, date: str) -> dict:
-        """ "
+        """
         Busca os dados da API IBGE.
         """
         try:
             url = self.build_url(date)
+            print(url)
             logging.debug(f"URL IBGE: {url}")
 
             # Faz a requisição HTTP
@@ -288,9 +264,7 @@ class TesouroFetchData(IFetchData):
     """Classe para coletar dados de taxas do Tesouro Direto."""
 
     def __init__(self) -> None:
-        super().__init__(
-            file_yaml["endpoints"]["tesouro"]["taxas_tesouro"]["base_url"]
-        )
+        super().__init__(file_yaml["endpoints"]["tesouro"]["taxas_tesouro"]["base_url"])
 
     def parse_date(self, date_str: str) -> datetime:
         """Tenta interpretar a data em diferentes formatos possíveis."""
