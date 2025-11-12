@@ -99,14 +99,17 @@ class FocusFetchData(IFetchData):
                 pass
         raise ValueError(f"Formato de data inválido: {date_str}")
 
-    def build_url(
-        self, indicator: str, date: str, temporal_series: str
-    ) -> str:
+    def build_url(self, indicator: str, date: str, temporal_series: str) -> str:
         """Constrói URL completa para requisição da API Olinda."""
 
-        if indicator not in file_yaml["endpoints"]["bcb"]["focus"]["params"]["indicator"]["opcoes"]:
+        if (
+            indicator
+            not in file_yaml["endpoints"]["bcb"]["focus"]["params"]["indicator"][
+                "opcoes"
+            ]
+        ):
             raise ValueError(f"Indicador inválido: {indicator}")
-        
+
         if not date or not indicator or not temporal_series:
             raise ValueError(
                 "`dt_referencia`, `indicador` e `serie_temporal` "
@@ -131,15 +134,11 @@ class FocusFetchData(IFetchData):
                 f"DataReferencia eq '{date_str}'"
             )
         else:
-            raise ValueError(
-                "`serie_temporal` inválido. Deve ser 'anual' ou 'mensal'."
-            )
+            raise ValueError("`serie_temporal` inválido. Deve ser 'anual' ou 'mensal'.")
 
         return url
 
-    def fetch_data(
-        self, indicator: str, date: str, temporal_series: str
-    ) -> dict:
+    def fetch_data(self, indicator: str, date: str, temporal_series: str) -> dict:
         """
         Realiza a requisição HTTP e retorna os dados como um DataFrame.
         """
@@ -186,10 +185,7 @@ class DolarFetchData(IFetchData):
         Constroi a URL com os parâmetros necessários.
         """
         parsed_date = self.parse_date(date).strftime("%m-%d-%Y")
-        params = {
-            "@dataCotacao": f"'{parsed_date}'",
-            "$format": "json"
-        }
+        params = {"@dataCotacao": f"'{parsed_date}'", "$format": "json"}
 
         return f"{self.endpoint}?{urlencode(params)}"
 
@@ -235,20 +231,13 @@ class IbgeFetchData(IFetchData):
         """
         parsed_date = self.parse_date(date).strftime("%Y%m")
 
-        values = {
-            "t": "1737",
-            "n1": "all",
-            "p": parsed_date
-        }
+        values = {"t": "1737", "n1": "all", "p": parsed_date}
 
-        params = {
-            "formato": "json"
-        }
+        params = {"formato": "json"}
 
         values_formatted = [f"{key}/{value}" for key, value in values.items()]
 
         return f"{self.endpoint}/{'/'.join(values_formatted)}?{urlencode(params)}"
-
 
     def fetch_data(self, date: str) -> dict:
         """
@@ -275,9 +264,7 @@ class TesouroFetchData(IFetchData):
     """Classe para coletar dados de taxas do Tesouro Direto."""
 
     def __init__(self) -> None:
-        super().__init__(
-            file_yaml["endpoints"]["tesouro"]["taxas_tesouro"]["base_url"]
-        )
+        super().__init__(file_yaml["endpoints"]["tesouro"]["taxas_tesouro"]["base_url"])
 
     def parse_date(self, date_str: str) -> datetime:
         """Tenta interpretar a data em diferentes formatos possíveis."""

@@ -9,8 +9,9 @@ from src.domain.transform_data import FactoryAPIs
 with open("api_endpoints.yaml", "r") as f:
     endpoints = yaml.safe_load(f)
 
-s3 = boto3.client('s3')
+s3 = boto3.client("s3")
 BUCKET = "lambda-s3-api-mercado-temp"
+
 
 def lambda_handler(event, context):
     api_name = event.get("api_name")
